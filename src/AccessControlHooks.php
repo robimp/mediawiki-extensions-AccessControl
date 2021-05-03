@@ -1,4 +1,5 @@
 <?php
+use MediaWiki\MediaWikiServices;
 
 /**
  * @license GPL-2.0-or-later
@@ -128,7 +129,15 @@ class AccessControlHooks {
 	public static function getUsersFromPages( $group ) {
 		/* Extracts the allowed users from the userspace access list */
 		$allow = [];
-		$gt = Title::makeTitle( NS_MAIN, $group );
+		$group_page = explode(':', $group);
+		if ( count( $group_page ) > 1 ) {
+			$namespace = MediaWikiServices::getInstance()->getNamespaceInfo()->getCanonicalIndex( strtolower( $group_page[0] ) );
+			$page_name = $group_page[1];
+		} else {
+			$namespace = NS_MAIN;
+			$page_name = $group_page[0];
+		}
+		$gt = Title::makeTitle( $namespace, $page_name );
 		// Article::fetchContent() is deprecated.
 		// Replaced by WikiPage::getContent()
 		$groupPage = WikiPage::factory( $gt );
